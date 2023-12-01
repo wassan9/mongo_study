@@ -42,11 +42,39 @@ const productSchema = new mongoose.Schema({
   }
 });
 
-productSchema.methods.greet = function() {
-  console.log("ハロー！やっほー！");
+productSchema.methods.toggleOnSale = function() {
+  this.onSale = !this.onSale;
+  return this.save();
 }
 
+productSchema.methods.addCategory = function(newCat) {
+  this.categories.push(newCat);
+  return this.save();
+}
+
+productSchema.statics.fireSale = function() {
+  return this.updateMany({},{ onSale: true, price: 0 });
+}
+
+// productSchema.methods.greet = function() {
+//   console.log("ハロー！やっほー！");
+//   console.log(`- ${this.name}からの呼び出し`);
+// }
+
 const Product = mongoose.model("Product", productSchema);
+
+const findProduct = async () => {
+  const foundProduct = await Product.findOne({name: "マウンテンバイク"});
+  console.log(foundProduct);
+  await foundProduct.toggleOnSale();
+  console.log(foundProduct);
+  await foundProduct.addCategory("アウトドア");
+  console.log(foundProduct);
+}
+
+// findProduct();
+
+Product.fireSale().then(msg => console.log(msg));
 
 // const bike = new Prooduct({
 //   name: "ジャージ",
